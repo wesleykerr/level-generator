@@ -18,6 +18,7 @@ allprojects {
         appName = 'level-generator'
         gdxVersion = '1.2.0'
         roboVMVersion = '0.0.14'
+        guavaVersion = '14.0.1'
     }
 
     repositories {
@@ -62,6 +63,9 @@ project(":core") {
     dependencies {
         compile "com.badlogicgames.gdx:gdx:$gdxVersion"
         compile "com.badlogicgames.gdx:gdx-box2d:$gdxVersion"
+        compile "com.google.guava:guava:$guavaVersion"
+        testCompile group: 'junit', name: 'junit', version: '4.+'
+        testCompile group: 'org.mockito', name: 'mockito-all', version: '1.9.5'
     }
 }
 
