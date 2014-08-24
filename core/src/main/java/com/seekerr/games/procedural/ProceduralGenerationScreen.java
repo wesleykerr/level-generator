@@ -115,7 +115,7 @@ public class ProceduralGenerationScreen implements Screen {
                 float x = j * gridSize;
                 float y = i * gridSize;
 
-                TextureRegion region = map[i][j] == CaveGenerationImpl.WALL ? wall
+                TextureRegion region = map[i][j] == CaveGenerationImpl.FILLED ? wall
                         : floor;
                 spriteBatch.draw(region, x, y, gridSize, gridSize);
             }
@@ -133,7 +133,7 @@ public class ProceduralGenerationScreen implements Screen {
 
                 float x = j * gridSize;
                 float y = i * gridSize;
-                if (map[i][j] == CaveGenerationImpl.WALL)
+                if (map[i][j] == CaveGenerationImpl.FILLED)
                     shapeRenderer.setColor(Color.DARK_GRAY);
                 else {
                     shapeRenderer.setColor(Color.WHITE);

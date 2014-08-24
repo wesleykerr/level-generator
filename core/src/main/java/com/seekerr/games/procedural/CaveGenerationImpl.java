@@ -34,7 +34,7 @@ public class CaveGenerationImpl {
     // for speed and convenience we assume wall will always be 1 so
     // we can do a simple count to find the number of walls surrounding us.
     public static final boolean EMPTY = false;
-    public static final boolean WALL = true;
+    public static final boolean FILLED = true;
 
     private long seed;
     private Random random;
@@ -87,7 +87,7 @@ public class CaveGenerationImpl {
                 if (i < 0 || j < 0 || i >= map.length || j > map[i].length) {
                     continue;
                 }
-                count += map[i][j] == WALL ? 1 : 0;
+                count += map[i][j] == FILLED ? 1 : 0;
             }
         }
         return count;
@@ -112,7 +112,7 @@ public class CaveGenerationImpl {
                 if (i < 0 || j < 0 || i >= map.length || j >= map[i].length) {
                     continue;
                 }
-                count += map[i][j] == WALL ? 1 : 0;
+                count += map[i][j] == FILLED ? 1 : 0;
             }
         }
         return count;
@@ -125,16 +125,16 @@ public class CaveGenerationImpl {
         bufferMap = new boolean[height][width];
         for (int i = 0; i < height; ++i) {
             for (int j = 0; j < width; ++j) {
-                bufferMap[i][j] = WALL;
+                bufferMap[i][j] = FILLED;
 
                 if (i == 0 || j == 0 || i == map.length - 1
                         || j == map[i].length - 1) {
-                    map[i][j] = WALL;
+                    map[i][j] = FILLED;
                     continue;
                 }
 
                 if (random.nextDouble() < 0.4) {
-                    map[i][j] = WALL;
+                    map[i][j] = FILLED;
                 }
             }
         }
@@ -154,7 +154,7 @@ public class CaveGenerationImpl {
                 int count1 = getNeighborCount(map, i, j);
                 int count2 = getTwoStepNeighborCount(map, i, j);
                 if (count1 >= minCount || count2 <= maxCount) {
-                    bufferMap[i][j] = WALL;
+                    bufferMap[i][j] = FILLED;
                 } else {
                     bufferMap[i][j] = EMPTY;
                 }
@@ -269,7 +269,7 @@ public class CaveGenerationImpl {
                 return;
             }
 
-            if (map[y][x] == WALL) {
+            if (map[y][x] == FILLED) {
                 map[y][x] = EMPTY;
             }
         }

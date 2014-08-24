@@ -21,7 +21,7 @@ public class CaveGenerationTest {
     
     @Test
     public void testGetNeighborCount() {
-        boolean w = CaveGenerationImpl.WALL;
+        boolean w = CaveGenerationImpl.FILLED;
         boolean e = CaveGenerationImpl.EMPTY;
         boolean[][] testMap = {
                 { w, w, w, w, w },
@@ -42,7 +42,7 @@ public class CaveGenerationTest {
     
     @Test
     public void testGetTwoStepNeighborCount() {
-        boolean w = CaveGenerationImpl.WALL;
+        boolean w = CaveGenerationImpl.FILLED;
         boolean e = CaveGenerationImpl.EMPTY;
         boolean[][] testMap = {
                 { w, w, w, w, w },
