@@ -53,9 +53,12 @@ public class ProceduralGenerationScreen implements Screen {
     }
 
     private void generateCave() {
-        caveGenerator = CaveGenerationImpl.Builder.create().withSize(60, 40)
-                .withRandomSeed(System.currentTimeMillis()).addPhase(5, 2, 4)
-                .addPhase(5, -1, 5).build();
+        caveGenerator = CaveGenerationImpl.Builder.create()
+                .withSize(60, 40)
+                .withRandomSeed(System.currentTimeMillis())
+                .addPhase(5, 2, 4)
+                .addPhase(5, -1, 5)
+                .build();
         caveGenerator.generate();
     }
 

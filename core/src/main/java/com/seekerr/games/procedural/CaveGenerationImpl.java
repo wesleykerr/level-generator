@@ -1,12 +1,12 @@
 package com.seekerr.games.procedural;
 
-import java.awt.Point;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedHashSet;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Objects;
 import java.util.Random;
 import java.util.Set;
 
@@ -295,6 +295,37 @@ public class CaveGenerationImpl {
             buf.append("\n");
         }
         return buf.toString();
+    }
+
+    public static class Point {
+        int x;
+        int y;
+
+        public Point(int x, int y) {
+            this.x = x;
+            this.y = y;
+        }
+
+        public void setLocation(int x, int y) {
+            this.x = x;
+            this.y = y;
+        }
+
+        public boolean equals(Object obj) {
+            if (obj instanceof Point) {
+                Point p = (Point) obj;
+                return (p.x == x) && (p.y == y);
+            }
+            return super.equals(obj);
+        }
+
+        public int hashCode() {
+            return Objects.hash(x, y);
+        }
+
+        public String toString() {
+            return "[" + x + "," + y + "]";
+        }
     }
 
     public static class Phase {
