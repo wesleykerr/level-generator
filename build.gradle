@@ -16,7 +16,7 @@ allprojects {
     version = '1.0'
     ext {
         appName = 'level-generator'
-        gdxVersion = '1.2.0'
+        gdxVersion = '1.3.2-SNAPSHOT'
         roboVMVersion = '0.0.14'
         guavaVersion = '17.0'
     }
