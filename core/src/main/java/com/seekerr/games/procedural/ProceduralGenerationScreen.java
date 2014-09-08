@@ -1,5 +1,9 @@
 package com.seekerr.games.procedural;
 
+import static com.seekerr.games.procedural.LatticeFns.FILLED;
+
+import java.util.List;
+
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input.Buttons;
 import com.badlogic.gdx.Input.Keys;
@@ -15,6 +19,7 @@ import com.badlogic.gdx.graphics.g2d.TextureAtlas;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer.ShapeType;
+import com.google.common.collect.Lists;
 import com.seekerr.games.generator.Assets;
 import com.seekerr.games.procedural.CaveGenerationImpl.Phase;
 
@@ -41,10 +46,14 @@ public class ProceduralGenerationScreen implements Screen {
     private boolean initialized;
 
     private CaveGenerationImpl caveGenerator;
+    private ForestGenerationImpl forestGenerator;
+    
+    private List<Point> contour;
 
     private ShapeRenderer shapeRenderer;
     private SpriteBatch spriteBatch;
 
+    private boolean shouldDrawForest = false;
     private boolean shouldDrawShapes = false;
 
     public ProceduralGenerationScreen() {
@@ -53,13 +62,25 @@ public class ProceduralGenerationScreen implements Screen {
     }
 
     private void generateCave() {
+        long seed = System.currentTimeMillis();
+        Gdx.app.log(TAG, "generateCave seed: " + seed);
+        
         caveGenerator = CaveGenerationImpl.Builder.create()
                 .withSize(60, 40)
-                .withRandomSeed(System.currentTimeMillis())
+                .withRandomSeed(seed)
                 .addPhase(5, 2, 4)
                 .addPhase(5, -1, 5)
                 .build();
         caveGenerator.generate();
+        contour = LatticeFns.getContour(caveGenerator.getMap());
+
+        forestGenerator = ForestGenerationImpl.Builder.create()
+                .withSize(240, 160)
+                .withRandomSeed(seed)
+                .withInitialTrees(20)
+                .withSeedParams(7, 0.5, 0.1)
+                .build();
+        forestGenerator.generate();
     }
 
     /**
@@ -98,6 +119,14 @@ public class ProceduralGenerationScreen implements Screen {
             renderShapes(camera, gridSize);
         else
             renderSprites(camera, gridSize);
+        renderContour(camera, gridSize);
+        
+        if (shouldDrawForest) {
+            gridx = width / forestGenerator.getForest()[0].length;
+            gridy = height / forestGenerator.getForest().length;
+            gridSize = Math.min(gridx, gridy);
+            renderForest(camera, gridSize);
+        }
 
         batch.begin();
         font.draw(batch, "FPS: " + Gdx.graphics.getFramesPerSecond(), 20, 20);
@@ -118,7 +147,7 @@ public class ProceduralGenerationScreen implements Screen {
                 float x = j * gridSize;
                 float y = i * gridSize;
 
-                TextureRegion region = map[i][j] == CaveGenerationImpl.FILLED ? wall
+                TextureRegion region = map[i][j] == FILLED ? wall
                         : floor;
                 spriteBatch.draw(region, x, y, gridSize, gridSize);
             }
@@ -136,13 +165,45 @@ public class ProceduralGenerationScreen implements Screen {
 
                 float x = j * gridSize;
                 float y = i * gridSize;
-                if (map[i][j] == CaveGenerationImpl.FILLED)
+                if (map[i][j] == FILLED)
                     shapeRenderer.setColor(Color.DARK_GRAY);
                 else {
                     shapeRenderer.setColor(Color.WHITE);
                 }
                 shapeRenderer.rect(x, y, gridSize, gridSize);
             }
+        }
+        shapeRenderer.end();
+    }
+
+    private void renderForest(Camera camera, int gridSize) {
+        shapeRenderer.setProjectionMatrix(camera.combined);
+        shapeRenderer.begin(ShapeType.Filled);
+        
+        byte[][] map = forestGenerator.getForest();
+        for (int i = 0; i < map.length; ++i) { 
+            for (int j = 0; j < map[i].length; ++j) { 
+                
+                float x = j*gridSize;
+                float y = i*gridSize;
+                if (map[i][j] == ForestGenerationImpl.FOREST) {
+                    shapeRenderer.setColor(Color.GREEN);
+                    shapeRenderer.rect(x, y, gridSize, gridSize);
+                }
+            }
+        }
+        shapeRenderer.end();
+    }
+
+    private void renderContour(Camera camera, int gridSize) {
+        shapeRenderer.setProjectionMatrix(camera.combined);
+        shapeRenderer.begin(ShapeType.Line);
+        shapeRenderer.setColor(Color.WHITE);
+
+        for (Point p : contour) {
+            float x = p.x * gridSize;
+            float y = p.y * gridSize;
+            shapeRenderer.rect(x, y, gridSize, gridSize);
         }
         shapeRenderer.end();
     }
@@ -209,6 +270,7 @@ public class ProceduralGenerationScreen implements Screen {
             case Keys.I:
                 Gdx.app.log(TAG, "Initialize cave!");
                 caveGenerator.initialize();
+                contour = Lists.newArrayList();
                 return true;
             case Keys.NUM_1:
                 Phase params1 = caveGenerator.getPhase(0);
@@ -217,6 +279,9 @@ public class ProceduralGenerationScreen implements Screen {
             case Keys.NUM_2:
                 Phase params2 = caveGenerator.getPhase(1);
                 caveGenerator.step(params2.min, params2.max);
+                return true;
+            case Keys.F:
+                shouldDrawForest = !shouldDrawForest;
                 return true;
             }
             return false;
