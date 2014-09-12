@@ -31,7 +31,7 @@ public class ForestGenerationImpl {
     
     public int initialTrees         = 10;
     
-    public int seedRadius           = 5;
+    public int seedRadius           = 30;
     public double seedDecay         = 0.2;
     public double seedStrength      = 0.05;
 
@@ -51,30 +51,25 @@ public class ForestGenerationImpl {
 
     }
     
-    @VisibleForTesting void create() { 
+    /**
+     * Initialize the forest.
+     */
+    public void initialize() {
         rand = new Random(seed);
         
         forest = new byte[height][width];
         trees = Lists.newLinkedList();
         seeds = Maps.newHashMap();
-    }
-    
-    /**
-     * Initialize the forest.
-     */
-    public void initialize() {
+
         Gdx.app.debug(TAG, "...Initializing forest generation");
         for (int i = 0; i < initialTrees; ++i) {
-            int x = 0;
-            int y = 0;
-            boolean found = false;
-            while (!found) {
-                x = rand.nextInt(width);
-                y = rand.nextInt(height);
-                if (forest[y][x] == EMPTY) {
+            while (true) { 
+                int x = rand.nextInt(width);
+                int y = rand.nextInt(height);
+                if (forest[y][x] == EMPTY) { 
                     forest[y][x] = FOREST;
-                    addTree(x, y);
-                    found = true;
+                    addTree(x,y);
+                    break;
                 }
             }
         }
@@ -82,6 +77,7 @@ public class ForestGenerationImpl {
     }
     
     public void step() { 
+        // decay existing seeds.
         Map<String,Double> tmpMap = Maps.newHashMap();
         for (Map.Entry<String,Double> entry : seeds.entrySet()) {
             double value = entry.getValue();
@@ -89,8 +85,22 @@ public class ForestGenerationImpl {
         }
         seeds = tmpMap;
 
-        createTrees();
-        removeDupTrees();
+        // create new trees.
+        for (Map.Entry<String,Double> entry : seeds.entrySet()) {
+            if (rand.nextDouble() < entry.getValue()) {
+                String[] tokens = entry.getKey().split(",");
+                addTree(Integer.parseInt(tokens[0]),
+                        Integer.parseInt(tokens[1]));
+            }
+        }
+
+        // remove seeds if tree exists.
+        for (Point p : trees) {
+            String key = p.x + "," + p.y;
+            if (seeds.containsKey(key))
+                seeds.remove(key);
+        }
+
         seedTrees();
     }
 
@@ -136,27 +146,6 @@ public class ForestGenerationImpl {
             }
         }
         return count / size;
-    }
-    
-    private void createTrees() {
-        for (Map.Entry<String,Double> entry : seeds.entrySet()) {
-            String key = entry.getKey();
-            int pos = key.indexOf(',');
-            int x = new Integer(key.substring(0, pos)).intValue();
-            int y = new Integer(key.substring(pos+1)).intValue();
-            
-            if (rand.nextDouble() < entry.getValue()) {
-                addTree(x,y);
-            }
-        }
-    }
-    
-    private void removeDupTrees() {
-        for (Point p : trees) {
-            String key = p.x + "," + p.y;
-            if (seeds.containsKey(key))
-                seeds.remove(key);
-        }
     }
     
     @VisibleForTesting void seedTrees() {
@@ -246,6 +235,14 @@ public class ForestGenerationImpl {
         return list;
     }
     
+    /**
+     * Allow the user to set the seed.
+     * @param seed
+     */
+    public void setSeed(long seed) { 
+        this.seed = seed;
+    }
+    
     public String toString() { 
         StringBuilder buf = new StringBuilder();
         for (int i = 0; i < forest.length; ++i) {
@@ -332,8 +329,6 @@ public class ForestGenerationImpl {
                 
         public ForestGenerationImpl build() { 
             Preconditions.checkNotNull(forest);
-            forest.create();
-
             ForestGenerationImpl tmp = forest;
             forest = null;
             return tmp;

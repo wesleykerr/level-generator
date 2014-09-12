@@ -1,5 +1,4 @@
 ## Java
-
 *.class
 *.war
 *.ear
@@ -61,3 +60,6 @@ build/
 
 ## OS Specific
 .DS_Store
+
+## Desktop (runs)
+desktop/*.png

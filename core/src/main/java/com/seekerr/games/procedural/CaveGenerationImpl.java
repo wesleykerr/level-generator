@@ -16,11 +16,13 @@ import com.google.common.collect.Lists;
 
 /**
  * This is the implementation of a cave generation algorithm detailed:
+ * 
  * http://www.roguebasin.com/index.php?title=
- * Cellular_Automata_Method_for_Generating_Random_Cave-Like_Levels Even though
- * this was originally designed for generating caves, it presents natural
- * looking structures that from the top down could be considered internals of
- * forests or an area where people can walk around.
+ * Cellular_Automata_Method_for_Generating_Random_Cave-Like_Levels
+ * 
+ * Even though this was originally designed for generating caves, it presents
+ * natural looking structures that from the top down could be considered
+ * internals of forests or an area where people can walk around.
  * 
  * @author wkerr
  *
@@ -116,7 +118,7 @@ public class CaveGenerationImpl {
             for (int i = 0; i < p.rounds; ++i) {
                 step(p.min, p.max);
                 Gdx.app.debug(TAG, "Round: " + i);
-                Gdx.app.debug(TAG, toString(map));
+                Gdx.app.debug(TAG, "\n" + toString(map));
             }
         }
     }
@@ -129,7 +131,6 @@ public class CaveGenerationImpl {
                 return Integer.compare(set2.size(), set1.size());
             } 
         });
-        Gdx.app.log(TAG, "Rooms: " + rooms.size());
         for (int i = 1; i < rooms.size(); ++i) {
             fixRoom(rooms.get(i));
         }
@@ -139,7 +140,7 @@ public class CaveGenerationImpl {
         initialize();
         iterate();
 
-        System.out.println(toString(map));
+        Gdx.app.debug(TAG, "\n" + toString(map));
         bufferMap = null;
         fixRooms();
     }
@@ -158,14 +159,11 @@ public class CaveGenerationImpl {
      */
     @VisibleForTesting void fixRoom(Set<Point> room) {
         Point point = room.iterator().next();
-        Gdx.app.log(TAG, "Starting point " + point.x + "," + point.y);
 
         Point delta = new Point(
                 (int) Math.signum((width / 2) - point.x),
                 (int) Math.signum((height / 2) - point.y));
         
-        Gdx.app.log(TAG, "Delta (" + delta.x + "," + delta.y + ")");
-
         while (point.valid(0, width, 0, height)) { 
             move(point, delta);
             
@@ -173,7 +171,6 @@ public class CaveGenerationImpl {
                 break;
             
             if (map[point.y][point.x] == EMPTY && !room.contains(point)) {
-                Gdx.app.log(TAG, " Point: " + point.toString() + " -- connected ");
                 return;
             }
             if (map[point.y][point.x] == FILLED) {
@@ -182,8 +179,8 @@ public class CaveGenerationImpl {
             
         }
 
-        Gdx.app.log(TAG, "Encountered a boundary before finding an open space!");
-        Gdx.app.log(TAG, ".. last location: " + point.x + ", " + point.y);
+        Gdx.app.error(TAG, "Encountered a boundary before finding an open space!");
+        Gdx.app.error(TAG, ".. last location: " + point.x + ", " + point.y);
     }
     
     /**
@@ -202,6 +199,14 @@ public class CaveGenerationImpl {
                 y += delta.y;
         }
         point.setLocation(x, y);
+    }
+    
+    /**
+     * Allow someone to change the seed.
+     * @param seed
+     */
+    public void setSeed(long seed) { 
+        this.seed = seed;
     }
 
     @Override
