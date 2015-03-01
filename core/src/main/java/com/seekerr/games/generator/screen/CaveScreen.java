@@ -1,26 +1,16 @@
 package com.seekerr.games.generator.screen;
 
-import static com.seekerr.games.procedural.LatticeFns.FILLED;
-
 import java.util.List;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input.Keys;
-import com.badlogic.gdx.graphics.Camera;
-import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.GL20;
-import com.badlogic.gdx.graphics.g2d.SpriteBatch;
-import com.badlogic.gdx.graphics.g2d.TextureAtlas;
-import com.badlogic.gdx.graphics.g2d.TextureRegion;
-import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
-import com.badlogic.gdx.graphics.glutils.ShapeRenderer.ShapeType;
 import com.google.common.collect.Lists;
-import com.seekerr.games.generator.Assets;
 import com.seekerr.games.generator.DefaultGameplayInput;
 import com.seekerr.games.procedural.CaveGenerationImpl;
 import com.seekerr.games.procedural.CaveGenerationImpl.Phase;
 import com.seekerr.games.procedural.LatticeFns;
-import com.seekerr.games.procedural.Point;
+import com.seekerr.games.procedural.Line;
 
 /**
  * This screen is for rendering different levels and allowing a graphical
@@ -35,7 +25,7 @@ public class CaveScreen extends DefaultScreen {
     private static final String TAG = "CaveScreen";
 
     private CaveGenerationImpl caveGenerator;
-    private List<Point> contour;
+    private List<Line> contour;
 
     public CaveScreen() {
         super();
@@ -52,7 +42,7 @@ public class CaveScreen extends DefaultScreen {
                 .addPhase(5, -1, 5)
                 .build();
         caveGenerator.generate();
-        contour = LatticeFns.getContour(caveGenerator.getMap());
+        contour = LatticeFns.getContourLines(caveGenerator.getMap());
     }
     
     /**
@@ -75,7 +65,7 @@ public class CaveScreen extends DefaultScreen {
         int gridy = height / caveGenerator.getMap().length;
         int gridSize = Math.min(gridx, gridy);
         renderSprites(camera, gridSize, caveGenerator.getMap());
-//        renderContour(camera, gridSize, contour);
+        renderContour(camera, gridSize, contour);
 
         batch.begin();
         font.draw(batch, "FPS: " + Gdx.graphics.getFramesPerSecond(), 20, 20);

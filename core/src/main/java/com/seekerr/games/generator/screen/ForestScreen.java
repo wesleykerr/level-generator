@@ -2,12 +2,9 @@ package com.seekerr.games.generator.screen;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input.Keys;
-import com.badlogic.gdx.graphics.Camera;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.GL20;
-import com.badlogic.gdx.graphics.glutils.ShapeRenderer.ShapeType;
 import com.seekerr.games.generator.DefaultGameplayInput;
-import com.seekerr.games.generator.ScreenshotFactory;
 import com.seekerr.games.procedural.ForestGenerationImpl;
 
 /**
@@ -69,7 +66,7 @@ public class ForestScreen extends DefaultScreen {
     }
 
     class ForestGameplayInput extends DefaultGameplayInput {    
-        private ScreenshotFactory ssFactory = null;
+//        private ScreenshotFactory ssFactory = null;
         
         public ForestGameplayInput(DefaultScreen screen) {
             super(screen);
@@ -91,16 +88,16 @@ public class ForestScreen extends DefaultScreen {
                 Gdx.app.log(TAG, "Step Forest!");
                 forestGenerator.step();
                 return true;
-            case Keys.O:
-                forestGenerator.setSeed(System.currentTimeMillis());
-                forestGenerator.initialize();
-                ssFactory = new ScreenshotFactory("forest");
-                ssFactory.saveScreenshot();
-                return true;
-            case Keys.P:
-                forestGenerator.step();
-                ssFactory.saveScreenshot();
-                return true;
+//            case Keys.O:
+//                forestGenerator.setSeed(System.currentTimeMillis());
+//                forestGenerator.initialize();
+//                ssFactory = new ScreenshotFactory("forest");
+//                ssFactory.saveScreenshot();
+//                return true;
+//            case Keys.P:
+//                forestGenerator.step();
+//                ssFactory.saveScreenshot();
+//                return true;
             }
             return false;
         }

@@ -251,4 +251,85 @@ public class LatticeFnsTest {
         impl.generate();
         List<Point> points = LatticeFns.getContour(impl.getMap());
     }
+    
+    @Test
+    public void testGetEdgeLines_Center() { 
+        boolean[][] testMap = {
+                { e, e, e },
+                { e, w, e },
+                { e, e, e },
+        };
+        List<Point> points = Lists.newArrayList();
+        points.add(new Point(1, 1));
+        
+        List<Line> edges = LatticeFns.getEdgeLines(points, testMap);
+        assertEquals(4, edges.size());
+        assertEquals(new Line(new Point(1, 1), new Point(2, 1)), edges.get(0));
+        assertEquals(new Line(new Point(2, 1), new Point(2, 2)), edges.get(1));
+        assertEquals(new Line(new Point(1, 2), new Point(2, 2)), edges.get(2));
+        assertEquals(new Line(new Point(1, 1), new Point(1, 2)), edges.get(3));
+    }
+
+    @Test
+    public void testGetEdgeLines_OneSides() { 
+        boolean[][] testMap = {
+                { e, w, e },
+                { w, w, w },
+                { e, e, e },
+        };
+        List<Point> points = Lists.newArrayList();
+        points.add(new Point(1, 1));
+        
+        List<Line> edges = LatticeFns.getEdgeLines(points, testMap);
+        assertEquals(1, edges.size());
+        assertEquals(new Line(new Point(1, 2), new Point(2, 2)), edges.get(0));
+    }
+
+    @Test
+    public void testGetEdgeLines_TwoSides() { 
+        boolean[][] testMap = {
+                { e, e, e },
+                { e, w, w },
+                { e, w, e },
+        };
+        List<Point> points = Lists.newArrayList();
+        points.add(new Point(1, 1));
+        
+        List<Line> edges = LatticeFns.getEdgeLines(points, testMap);
+        assertEquals(2, edges.size());
+        assertEquals(new Line(new Point(1, 1), new Point(2, 1)), edges.get(0));
+        assertEquals(new Line(new Point(1, 1), new Point(1, 2)), edges.get(1));
+    }
+
+    @Test
+    public void testGetEdgeLines_ThreeSides() { 
+        boolean[][] testMap = {
+                { e, e, e },
+                { e, w, e },
+                { e, w, e },
+        };
+        List<Point> points = Lists.newArrayList();
+        points.add(new Point(1, 1));
+        
+        List<Line> edges = LatticeFns.getEdgeLines(points, testMap);
+        assertEquals(3, edges.size());
+        assertEquals(new Line(new Point(1, 1), new Point(2, 1)), edges.get(0));
+        assertEquals(new Line(new Point(2, 1), new Point(2, 2)), edges.get(1));
+        assertEquals(new Line(new Point(1, 1), new Point(1, 2)), edges.get(2));
+    }
+            
+    @Test
+    public void testGetContourLine() {
+        boolean[][] testMap = {
+                { e, e, e },
+                { e, w, e },
+                { w, w, e },
+        };
+        List<Line> lines = LatticeFns.getContourLines(testMap);
+        assertEquals(4, lines.size());
+        assertEquals(new Line(new Point(1, 1), new Point(2, 1)), lines.get(0));
+        assertEquals(new Line(new Point(2, 1), new Point(2, 3)), lines.get(1));
+        assertEquals(new Line(new Point(1, 1), new Point(1, 2)), lines.get(2));
+        assertEquals(new Line(new Point(0, 2), new Point(1, 2)), lines.get(3));
+    }
 }

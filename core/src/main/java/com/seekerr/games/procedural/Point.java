@@ -10,6 +10,11 @@ public class Point {
         this.x = x;
         this.y = y;
     }
+    
+    public Point(Point p) { 
+        this.x = p.x;
+        this.y = p.y;
+    }
 
     public void setLocation(int x, int y) {
         this.x = x;
@@ -60,7 +65,7 @@ public class Point {
      * @return
      */
     public static Point subtract(Point a, Point b) { 
-        return new Point(a.x - b.x, a.y - b.y);
+        return a.subtract(b);
     }
     
     /**
@@ -71,5 +76,35 @@ public class Point {
      */
     public static Point add(Point a, Point b) { 
         return new Point(a.x + b.x, a.y + b.y);
+    }
+
+    /**
+     * Subtract the given point from this point and return a new Point.
+     * @param p
+     * @return
+     */
+    public Point subtract(Point p) {
+        return new Point(x - p.x, y - p.y);
+    }
+    
+    /**
+     * Returns a new point that is the absolute value of the original.
+     * @return
+     */
+    public Point abs() { 
+        return new Point(Math.abs(x), Math.abs(y));
+    }
+    
+    /**
+     * Enforce that this point is at most 1 in any direction.
+     * @return
+     */
+    public Point wrap() {
+        if (x > 1) x = 1;
+        if (x < -1) x = -1;
+        
+        if (y > 1) y = 1;
+        if (y < -1) y = 1;
+        return this;
     }
 }

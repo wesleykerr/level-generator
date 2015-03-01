@@ -18,7 +18,7 @@ import com.badlogic.gdx.graphics.glutils.ShapeRenderer.ShapeType;
 import com.seekerr.games.generator.Assets;
 import com.seekerr.games.generator.screen.ScreenFactory.ScreenEnum;
 import com.seekerr.games.procedural.ForestGenerationImpl;
-import com.seekerr.games.procedural.Point;
+import com.seekerr.games.procedural.Line;
 
 /**
  * This screen is for rendering different levels and allowing a graphical
@@ -126,18 +126,24 @@ public abstract class DefaultScreen implements Screen {
      * @param gridSize
      * @param contour
      */
-    protected void renderContour(Camera camera, int gridSize, List<Point> contour) {
+    protected void renderContour(Camera camera, int gridSize, List<Line> contour) {
         shapeRenderer.setProjectionMatrix(camera.combined);
         shapeRenderer.begin(ShapeType.Line);
         shapeRenderer.setColor(Color.WHITE);
 
-        for (Point p : contour) {
-            float x = p.getX() * gridSize;
-            float y = p.getY() * gridSize;
-            shapeRenderer.rect(x, y, gridSize, gridSize);
+        for (Line edge : contour) {
+            
+            float x1 = edge.getStart().getX() * gridSize;
+            float y1 = edge.getStart().getY() * gridSize;
+            
+            float x2 = edge.getEnd().getX() * gridSize;
+            float y2 = edge.getEnd().getY() * gridSize;
+            
+            shapeRenderer.line(x1, y1, x2, y2);
         }
         shapeRenderer.end();
     }
+    
     
     
     @Override

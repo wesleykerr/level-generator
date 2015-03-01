@@ -8,11 +8,10 @@ import java.util.Map;
 import java.util.Set;
 
 import com.badlogic.gdx.Gdx;
+import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
-
-
-
+import com.google.common.collect.Sets;
 
 public class LatticeFns {
     // for speed and convenience we assume wall will always be 1 so
@@ -104,7 +103,7 @@ public class LatticeFns {
             throw new RuntimeException("Missing current point.  backtrack:" + backtrackPoint);
         }
         
-        Point delta = Point.subtract(backtrackPoint, currentPoint);
+        Point delta = backtrackPoint.subtract(currentPoint).wrap();
         int start = MOORE_INDEX.get(delta);
         
         Point lastPoint = backtrackPoint;
@@ -214,6 +213,87 @@ public class LatticeFns {
         }
         return allBoundaryPoints;
     }
+
+    /**
+     * Converts each of the points into edge lines depending on whether or
+     * not the space in the map is free.
+     * @param points
+     * @param map
+     * @return
+     */
+    public static List<Line> getEdgeLines(List<Point> points, boolean[][] map) {
+        List<Line> edges = Lists.newArrayList();
+        Point[] neighbors = { new Point(0, 0), new Point(1, 0),
+                new Point(1, 1), new Point(0, 1) };
+
+        for (Point point : points) {
+            Point p = Point.add(point, new Point(0, -1));
+            if (p.valid(0, map[0].length, 0, map.length)
+                    && map[p.y][p.x] == EMPTY) {
+                edges.add(new Line(Point.add(point, neighbors[0]), Point.add(
+                        point, neighbors[1])));
+            }
+
+            p = Point.add(point, new Point(1, 0));
+            if (p.valid(0, map[0].length, 0, map.length)
+                    && map[p.y][p.x] == EMPTY) {
+                edges.add(new Line(Point.add(point, neighbors[1]), Point.add(
+                        point, neighbors[2])));
+            }
+
+            p = Point.add(point, new Point(0, 1));
+            if (p.valid(0, map[0].length, 0, map.length)
+                    && map[p.y][p.x] == EMPTY) {
+                edges.add(new Line(Point.add(point, neighbors[3]), Point.add(
+                        point, neighbors[2])));
+            }
+
+            p = Point.add(point, new Point(-1, 0));
+            if (p.valid(0, map[0].length, 0, map.length)
+                    && map[p.y][p.x] == EMPTY) {
+                edges.add(new Line(Point.add(point, neighbors[0]), Point.add(
+                        point, neighbors[3])));
+            }
+        }
+        return edges;
+    }
+    
+    /**
+     * Since we already have a set of points representing the 
+     * contour, we want to change these into actual lines.
+     * @param points
+     * @return
+     */
+    public static List<Line> getContourLines(boolean[][] map) {
+        List<Point> points = getContour(map);
+        List<Line> edges = getEdgeLines(points, map);
+        
+        List<Points> pointsList = Lists.newArrayList();
+        for (Line edge : edges) { 
+            if (pointsList.isEmpty()) {
+                pointsList.add(new Points(edge));
+            } else { 
+                boolean added = false;
+                for (Points pointsObj : pointsList) {
+                    if (pointsObj.canAdd(edge)) {
+                        pointsObj.add(edge);
+                        added = true;
+                        break;
+                    }
+                }
+
+                if (!added) {
+                    pointsList.add(new Points(edge));
+                }
+            }
+        }
+
+        List<Line> lines = Lists.newArrayList();
+        for (Points pointsObj : pointsList) {
+            lines.add(new Line(pointsObj.min, pointsObj.max));
+        }
+        return lines;
+    }
     
     public static void addNeighbor(Point neighbor, 
             boolean[][] map,
@@ -231,7 +311,13 @@ public class LatticeFns {
         }
     }
 
-
+    /**
+     * Return a list containing a representation of each room.  Rooms
+     * are a collection of points, one for each cell in the room.
+     * @param map
+     * @param type
+     * @return
+     */
     public static List<Set<Point>> getRooms(boolean[][] map, boolean type) {
         int height = map.length;
         int width = map[0].length;
@@ -282,6 +368,60 @@ public class LatticeFns {
         return rooms;
     }
     
+    private static class Points {
+        Set<Point> validConnectors;
+        Point delta;
+        
+        Point min;
+        Point max;
+        
+        public Points(Line line) { 
+            validConnectors = Sets.newHashSet();
+            validConnectors.add(line.getStart());
+            validConnectors.add(line.getEnd());
+
+            update(line.getStart());
+            update(line.getEnd());
+            
+            delta = line.getEnd().subtract(line.getStart()).abs();
+        }
+        
+        private void update(Point p) { 
+            if (min == null) { 
+                min = new Point(p);
+            } else { 
+                min.setLocation(Math.min(min.x, p.x), Math.min(min.y, p.y));
+            }
+            
+            if (max == null) { 
+                max = new Point(p);
+            } else { 
+                max.setLocation(Math.max(max.x, p.x), Math.max(max.y, p.y));
+            }
+        }
+        
+        public void add(Line line) { 
+            validConnectors.add(line.getStart());
+            validConnectors.add(line.getEnd());
+
+            update(line.getStart());
+            update(line.getEnd());
+        }
+        
+        public boolean canAdd(Line line) {
+            if (!validConnectors.contains(line.getStart()) && 
+                    !validConnectors.contains(line.getEnd())) {
+                return false;
+            }
+            
+            // At least one point overlaps with the points in this set, 
+            // so we need to check and see if the deltas match.
+            Point d = line.getEnd().subtract(line.getStart()).abs();
+            return d.equals(delta);
+        }
+    }
+
+        
     public static class MoorePixel {
         public Point point;
         public Point backtrack;

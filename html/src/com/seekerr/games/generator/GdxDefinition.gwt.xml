@@ -10,6 +10,8 @@
     <inherits name='com.google.common.collect.Collect' />
 	
 	<entry-point class='com.seekerr.games.generator.client.HtmlLauncher' />
-	
+	<source path="com.seekerr.games.generator">
+	   <exclude name="ScreenshotFactory.java" />
+	</source>
 	<set-configuration-property name="gdx.assetpath" value="../core/assets" />
 </module>
